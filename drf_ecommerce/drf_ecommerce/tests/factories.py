@@ -3,22 +3,14 @@ import factory
 from product.models import (
     Attribute,
     AttributeValue,
-    Brand,
     Category,
     Product,
     ProductImage,
     ProductLine,
+    ProductLineAttributeValue,
     ProductType,
-    ProductLineAttributeValue
+    Brand
 )
-
-
-class BrandFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = Brand
-
-    name = factory.Sequence(lambda n: "Brand_%d" % n)
-
 
 
 class CategoryFactory(factory.django.DjangoModelFactory):
@@ -27,6 +19,13 @@ class CategoryFactory(factory.django.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "test_category_%d" % n)
     slug = factory.Sequence(lambda n: "test_slug_%d" % n)
+
+
+class BrandFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Brand
+
+    name = factory.Sequence(lambda n: "Brand_%d" % n)
 
 
 class ProductTypeFactory(factory.django.DjangoModelFactory):
@@ -50,10 +49,10 @@ class ProductFactory(factory.django.DjangoModelFactory):
     pid = factory.Sequence(lambda n: "0000_%d" % n)
     description = "test_description"
     is_digital = False
-    brand = factory.SubFactory(BrandFactory)
     category = factory.SubFactory(CategoryFactory)
     is_active = True
     product_type = factory.SubFactory(ProductTypeFactory)
+    brand = factory.SubFactory(BrandFactory)
 
     @factory.post_generation
     def attribute_value(self, create, extracted, **kwargs):

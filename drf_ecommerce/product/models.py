@@ -1,13 +1,14 @@
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 from mptt.models import MPTTModel, TreeForeignKey
+
 from .fields import OrderField
 
 
 class IsActiveQueryset(models.QuerySet):
     def is_active(self):
         return self.filter(is_active=True)
-    
+
 
 class Category(MPTTModel):
     name = models.CharField(max_length=235, unique=True)
@@ -31,25 +32,34 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.name
-
+    
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(max_length=255)
     pid = models.CharField(max_length=10, unique=True)
     description = models.TextField(blank=True)
-    is_digital = models.BooleanField(default=False)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
+    is_digital = models.BooleanField(default=False)
     category = TreeForeignKey("Category", on_delete=models.PROTECT)
+    product_type = models.ForeignKey(
+        "ProductType", on_delete=models.PROTECT, related_name="product_type"
+    )
     is_active = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True, editable=False,)
-    attribute_value = models.ManyToManyField("AttributeValue", through="ProductAttributeValue", related_name="product_attr_value",)
-    product_type = models.ForeignKey("ProductType", on_delete=models.PROTECT, related_name="product")
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        editable=False,
+    )
+    attribute_value = models.ManyToManyField(
+        "AttributeValue",
+        through="ProductAttributeValue",
+        related_name="product_attr_value",
+    )
     objects = IsActiveQueryset.as_manager()
 
     def __str__(self):
         return self.name
-    
+
 
 class Attribute(models.Model):
     name = models.CharField(max_length=100)
@@ -61,15 +71,25 @@ class Attribute(models.Model):
 
 class AttributeValue(models.Model):
     attribute_value = models.CharField(max_length=100)
-    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE, related_name="attribute_value")
+    attribute = models.ForeignKey(
+        Attribute, on_delete=models.CASCADE, related_name="attribute_value"
+    )
 
     def __str__(self):
         return f"{self.attribute.name}-{self.attribute_value}"
 
 
 class ProductAttributeValue(models.Model):
-    attribute_value = models.ForeignKey(AttributeValue, on_delete=models.CASCADE, related_name="product_value_av",)
-    product = models.ForeignKey("Product", on_delete=models.CASCADE, related_name="producte_value_pl",)
+    attribute_value = models.ForeignKey(
+        AttributeValue,
+        on_delete=models.CASCADE,
+        related_name="product_value_av",
+    )
+    product = models.ForeignKey(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="producte_value_pl",
+    )
 
     class Meta:
         unique_together = ("attribute_value", "product")

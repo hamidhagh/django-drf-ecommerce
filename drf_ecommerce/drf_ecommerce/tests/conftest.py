@@ -24,7 +24,6 @@ register(AttributeFactory)
 register(ProductLineAttributeValueFactory)
 register(BrandFactory)
 
-
 @pytest.fixture
 def api_client():
     return APIClient
